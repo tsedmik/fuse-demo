@@ -1,0 +1,129 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "AddressBook API",
+        "description": "A brand new API with no content.  Go nuts!",
+        "version": "1.0"
+    },
+    "consumes": [
+        "application/json"
+    ],
+    "produces": [
+        "application/json"
+    ],
+    "paths": {
+        "/entries": {
+            "get": {
+                "summary": "List All Entries",
+                "description": "Gets a list of all `Entry` entities.",
+                "operationId": "getEntries",
+                "responses": {
+                    "200": {
+                        "description": "Successful response - returns an array of `Entry` entities.",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Entry"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Create a Entry",
+                "description": "Creates a new instance of a `Entry`.",
+                "operationId": "createEntry",
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "description": "A new `Entry` to be created.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Entry"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successful response."
+                    }
+                }
+            }
+        },
+        "/entries/{entryId}": {
+            "get": {
+                "summary": "Get a Entry",
+                "description": "Gets the details of a single instance of a `Entry`.",
+                "operationId": "getEntry",
+                "responses": {
+                    "200": {
+                        "description": "Successful response - returns a single `Entry`.",
+                        "schema": {
+                            "$ref": "#/definitions/Entry"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "Update a Entry",
+                "description": "Updates an existing `Entry`.",
+                "operationId": "updateEntry",
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "description": "Updated `Entry` information.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Entry"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Successful response."
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete a Entry",
+                "description": "Deletes an existing `Entry`.",
+                "operationId": "deleteEntry",
+                "responses": {
+                    "204": {
+                        "description": "Successful response."
+                    }
+                }
+            },
+            "parameters": [
+                {
+                    "name": "entryId",
+                    "in": "path",
+                    "description": "A unique identifier for a `Entry`.",
+                    "required": true,
+                    "type": "string"
+                }
+            ]
+        }
+    },
+    "definitions": {
+        "Entry": {
+            "required": [
+                "id",
+                "name"
+            ],
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://camel.apache.org/schema/spring       http://camel.apache.org/schema/spring/camel-spring.xsd">
+    
+    <bean class="io.example.openapi.EntryService" id="entryService" scope="singleton"/>
+
+    <camelContext id="context1" xmlns="http://camel.apache.org/schema/spring">
+
+        <onException>
+            <exception>java.lang.Exception</exception>
+            <handled><constant>true</constant></handled>
+            <setHeader headerName="Exchange.HTTP_RESPONSE_CODE">
+                <constant>500</constant>
+            </setHeader>
+            <setBody>
+                <simple>${exception.message}</simple>
+            </setBody>
+        </onException>
+
+        <restConfiguration component="servlet" apiContextPath="/openapi.json"/>
+
+        <rest id="rest1" path="/" enableCORS="true">
+            <get id="openapi.json" produces="application/json" uri="openapi.json">
+                <description>Gets the openapi document for this service</description>
+                <route id="rest1-route1">
+                    <setHeader id="setHeader-route1" headerName="Exchange.CONTENT_TYPE">
+                        <constant>application/vnd.oai.openapi+json</constant>
+                    </setHeader>
+                    <setBody id="setBody-route1">
+                        <simple>resource:classpath:openapi.json</simple>
+                    </setBody>
+                </route>
+            </get>
+        </rest>
+
+        <rest id="rest2" path="" bindingMode="json" enableCORS="true">
+            <get id="getEntries" uri="/entries">
+                <description>Gets a list of all `Entry` entities.</description>
+                <to uri="direct:getEntries"/>
+            </get>
+            <post id="createEntry" uri="/entries" type="io.example.openapi.Entry">
+                <description>Creates a new instance of a `Entry`.</description>
+                <param description="A new `Entry` to be created." name="body" required="true" type="body"/>
+                <to uri="direct:createEntry"/>
+            </post>
+            <get id="getEntry" uri="/entries/{entryId}">
+                <description>Gets the details of a single instance of a `Entry`.</description>
+                <to uri="direct:getEntry"/>
+            </get>
+            <put id="updateEntry" uri="/entries/{entryId}" type="io.example.openapi.Entry">
+                <description>Updates an existing `Entry`.</description>
+                <param description="Updated `Entry` information." name="body" required="true" type="body"/>
+                <to uri="direct:updateEntry"/>
+            </put>
+            <delete id="deleteEntry" uri="/entries/{entryId}">
+                <description>Deletes an existing `Entry`.</description>
+                <to uri="direct:deleteEntry"/>
+            </delete>
+        </rest>
+
+        <route id="route-a3b3a495-7e70-4f81-a109-b01b8f5db72a">
+            <from id="from-e2c82e5b-e320-45a6-8934-8f802dcf3f7e" uri="direct:getEntries"/>
+            <bean id="_bean1" method="getAllEntries" ref="entryService"/>
+        </route>
+        <route id="route-43c9102b-9a47-4d45-a4ba-3d259caf5159">
+            <from id="from-bff73e63-6665-4f00-91eb-d1e66952e91f" uri="direct:createEntry"/>
+            <bean id="_bean2" method="addEntry" ref="entryService"/>
+        </route>
+        <route id="route-c6755d68-5db2-4c87-ba49-2c7a13e917b1">
+            <from id="from-8ca83ed8-7820-4e2e-ba0d-46c743d500a5" uri="direct:getEntry"/>
+            <bean id="_bean3" method="getEntry(${header.entryId})" ref="entryService"/>
+        </route>
+        <route id="route-36fe7217-b175-4ba8-a614-5e94f299d59c">
+            <from id="from-a16d097e-d0ec-45a9-a5dd-c7aa7cf9b531" uri="direct:updateEntry"/>
+            <bean id="_bean4" method="updateEntry" ref="entryService"/>
+        </route>
+        <route id="route-621b2cdd-8018-4696-ada2-9975780c4f46">
+            <from id="from-73195a4c-36f3-44a0-8729-6e440f662aac" uri="direct:deleteEntry"/>
+            <bean id="_bean5" method="removeEntry(${header.entryId})" ref="entryService"/>
+        </route>
+
+        <route id="route2">
+            <from id="from-route2" uri="direct:501"/>
+            <log id="log-route2" message="API operation not yet implemented: ${headers.CamelHttpMethod} ${headers.CamelHttpPath}"/>
+            <setHeader id="setHeader-route2" headerName="Exchange.HTTP_RESPONSE_CODE">
+                <constant>501</constant>
+            </setHeader>
+            <setBody id="setBody-route2">
+                <simple>API operation not implemented: ${headers.CamelHttpMethod} ${headers.CamelHttpPath}</simple>
+            </setBody>
+        </route>
+
+    </camelContext>
+</beans>
